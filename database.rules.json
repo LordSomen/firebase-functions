@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "customer_data": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
