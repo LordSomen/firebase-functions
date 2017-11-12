@@ -1,7 +1,6 @@
 var dateMain = new Date(Date.now());
 var hoursMain = dateMain.getHours();
 var minutesMain = dateMain.getMinutes();
-if(hoursMain === 17 && minutesMain === 43){
     var firebase = require("firebase");
       var config = {
           apiKey: "AIzaSyAto6_dqcXg0-3nPQPWwhb9FlJJMUZMbr8",
@@ -15,7 +14,7 @@ if(hoursMain === 17 && minutesMain === 43){
  var database = firebase.database();
  var ref = database.ref("customer_data");
  ref.on("value",getData,getError);
- }
+ 
  function getData(data){
    var customer_data = data.val();
    var keys = Object.keys(customer_data);

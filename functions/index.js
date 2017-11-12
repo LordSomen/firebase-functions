@@ -8,9 +8,12 @@
 var functions = require("firebase-functions");
 var admin = require("firebase-admin");
 admin.initializeApp(functions.config().firebase);
-var dateMain = new Date(Date.now());
-var hoursMain = dateMain.getHours();
-var minutesMain = dateMain.getMinutes();
+exports.sms_job =
+  functions.pubsub.topic('hourly-tick').onPublish((event) =>{
+
+    var dateMain = new Date(Date.now());
+    var hoursMain = dateMain.getHours();
+    var minutesMain = dateMain.getMinutes();
 /*
     var firebase = require("firebase");
       var config = {
@@ -22,9 +25,17 @@ var minutesMain = dateMain.getMinutes();
           messagingSenderId: "747817268852"
  };
  firebase.initializeApp(config);*/
- var database = functions.database();
+/* exports.readDatebase = functions.database.ref("customer_data")
+ .onWrite((event)=>{
+      getData(event.data);
+      return true;
+ });*/
+
+ var database = admin.database();
  var ref = database.ref("customer_data");
  ref.on("value",getData,getError);
+ return true;
+   });
  function getData(data){
    var customer_data = data.val();
    var keys = Object.keys(customer_data);
@@ -86,7 +97,8 @@ var minutesMain = dateMain.getMinutes();
  // The hash key could be found under Help->All Documentation->Your hash key.
  //Alternatively you can use your Textlocal password in plain text.
   var sender = 'TXTLCL';
-  var data = 'username=' + username + '&hash=' + hash + '&sender=' + sender + '&numbers=' + toNumber + '&message=' + msg;
+  var data = 'username=' + username + '&hash=' + hash + '&sender=' + sender +
+  '&numbers=' + toNumber + '&message=' + msg;
   var options = {
     host: 'api.textlocal.in', path: '/send?' + data
   };
@@ -102,5 +114,5 @@ var minutesMain = dateMain.getMinutes();
  var date = new Date(Date.now());
  var hours = date.getHours();
  var minutes = date.getMinutes();
- http.request(options, callback).end();
+  http.request(options, callback).end();
  }

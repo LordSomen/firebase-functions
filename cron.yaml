@@ -1,5 +1,0 @@
-cron:
-- description: daily sms job
-  url: /tasks/summary
-  target: beta
-  schedule: every 5 minutes
