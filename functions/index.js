@@ -8,12 +8,18 @@
 var functions = require("firebase-functions");
 var admin = require("firebase-admin");
 admin.initializeApp(functions.config().firebase);
-exports.sms_job =
-  functions.pubsub.topic('hourly-tick').onPublish((event) =>{
 
-    var dateMain = new Date(Date.now());
-    var hoursMain = dateMain.getHours();
-    var minutesMain = dateMain.getMinutes();
+exports.sms_job =
+  functions.pubsub.topic('hourly-tick').onPublish((event) => {
+
+        //var dateMain = new Date(Date.now());
+    //var hoursMain = dateMain.getHours();
+    //var minutesMain = dateMain.getMinutes();
+    var database = admin.database();
+    var ref = database.ref("customer_data");
+    ref.on("value",getData,getError);
+    return true;
+});
 /*
     var firebase = require("firebase");
       var config = {
@@ -25,37 +31,42 @@ exports.sms_job =
           messagingSenderId: "747817268852"
  };
  firebase.initializeApp(config);*/
-/* exports.readDatebase = functions.database.ref("customer_data")
+exports.readDatebase = functions.database.ref("customer_data")
  .onWrite((event)=>{
-      getData(event.data);
-      return true;
- });*/
 
- var database = admin.database();
- var ref = database.ref("customer_data");
- ref.on("value",getData,getError);
- return true;
-   });
+      var dataReadDataBase = event.data;
+      var phoneno = dataReadDataBase.phoneNo;
+      sendSms(phoneno,"submission")
+   // var database = admin.database();
+    //var ref = database.ref("customer_data");
+    //ref.on("value",getData,getError);
+
+      return true;
+ });
+
+
+
  function getData(data){
    var customer_data = data.val();
    var keys = Object.keys(customer_data);
    var currentDateTime = new Date(Date.now());
    var currentDate = currentDateTime.getDate();
    var currentMonth = currentDateTime.getMonth();
-   var hours = currentDateTime.getHours();
-   console.log(hours);
-   console.log(currentMonth);
-   console.log(currentDate);
+   //var hours = currentDateTime.getHours();
+  // console.log(hours);
+   //console.log(currentMonth);
+   //console.log(currentDate);
    for(var i=0;i<keys.length;i++){
-      var k = keys[i];
-      var dob = customer_data[k].dateOfBirth;
-      var anniversary = customer_data[k].dateOfAnniversary;
-      var phoneNo = customer_data[k].phoneNo;
+      var k = i;
+      var dob = customer_data[i].dateOfBirth;
+      var anniversary = customer_data[i].dateOfAnniversary;
+      var phoneNo = customer_data[i].phoneNo;
       if(dob !== "Not available" || anniversary !== "Not available"){
-        var d = new Date(dob.split("/").reverse());
+          var dsplit = dob.split(" ");
+        var d = new Date(dsplit[3],dsplit[1],dsplit[0]);
         var monthDatabase = d.getMonth();
         var dateDatabase = d.getDate();
-        var date = d.getTime();
+        //var date = d.getTime();
         console.log(date);
         if(dateDatabase === currentDate && monthDatabase === currentMonth){
           console.log("success");
@@ -63,8 +74,9 @@ exports.sms_job =
           sendSms(phoneNo,"birthday");
         }
       }
-       if(anniversary !== "Not available"){
-        var d = new Date(anniversary.split("/").reverse());
+       else if(anniversary !== "Not available"){
+          var dsplit = anniversary.split(" ");
+          var d = new Date(dsplit[3],dsplit[1],dsplit[0]);
         var monthDatabase = d.getMonth();
         var dateDatabase = d.getDate();
         var date = d.getTime();
@@ -89,14 +101,16 @@ exports.sms_job =
    if(purpose === "birthday")
       var msg = urlencode('Happy Birthday');
     else if(purpose === "anniversary"){
-      var msg = urlencode('Happy Anniversary !!! this are the offers for you from Restog...');
-    }
+      msg = urlencode('Happy Anniversary !!! this are the offers for you from Restog...');
+    }else if(purpose === "submission"){
+        msg = urlencode("Thank you for submitting the review your review is important to us");
+   }
    var toNumber = phoneNo;
-  var username = 'restogdigitalsolution@gmail.com';
-  var hash = '951fb93f755083037012460c1800e50ab325c47efcf6ef4364217655a6b4ec6b';
+  var username = 'officialcafevr1@gmail.com';
+  var hash = '36408521b2049ffc69356ec519b9a824c37442202a9d62fb4d170e1bee9c18e0';
  // The hash key could be found under Help->All Documentation->Your hash key.
  //Alternatively you can use your Textlocal password in plain text.
-  var sender = 'TXTLCL';
+  var sender = 'txtlcl';
   var data = 'username=' + username + '&hash=' + hash + '&sender=' + sender +
   '&numbers=' + toNumber + '&message=' + msg;
   var options = {
